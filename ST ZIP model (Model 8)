@@ -1,0 +1,74 @@
+# WinBUGS code for ST ZIP model (Model 8)
+
+model {
+  for ( i in 1:N.site ) {
+    for ( j in 1:N.time) {
+     y[ i, j ] ~ dpois(mu[i,j])
+     mu[ i, j ] <- (1-zr[ i, j ])*lambda[ i, j ]
+     zr[ i, j ] ~ dbern( p0[ i, j ] )
+     log(lambda[ i, j ]) <- beta0+ x1[ i, j ]*beta1 + x2[ i, j ]*beta2 + x3[ i, j ]*beta3+ x4[ i, j]*beta4
+                                       +log(pop[ i, j]) + w[ i ] + v[ i ] + k[ j ] + u[ j ] + phi[ j, i ]
+     logit(p0[ i, j ]) <- alpha0+ x1[ i, j ]*alpha1 + x2[ i, j ]*alpha2 + x3[ i, j]*alpha3
+                               + x4[ i, j]*alpha4 + log(pop[ i, j])
+  }
+ }
+  
+ #priors 
+      beta0 ~ dnorm(0,0.1)
+      beta1 ~ dnorm(0,0.1)
+      beta2 ~ dnorm(0,0.1)
+      beta3 ~ dnorm(0,0.1)
+      beta4 ~ dnorm(0,0.1)
+      alpha0 ~ dnorm(0,0.1)
+      alpha1 ~ dnorm(0,0.1)
+      alpha2 ~ dnorm(0,0.1)
+      alpha3 ~ dnorm(0,0.1)
+      alpha4 ~ dnorm(0,0.1)
+
+  
+  # Spatial CAR prior for v
+  v[ 1:N.site ]~car.normal(adj[ ],weights[ ],num[ ],tau.v)  
+  for(m in 1:SumNumNeigh) {weights[m]<-1 }
+  tau.v <- pow(sigma.v, -2)
+  sigma.v ~ dunif(0,100)
+ 
+  # Temporal prior for u ( AR(1) )
+  mu.u[1] <- 0
+  u[ 1 ] ~ dnorm(mu.u[1], tau.u)
+  for ( j in 2:N.time ) {
+      mu.u[ j ] <- u[ j-1 ]*rho
+      u[ j ] ~ dnorm(mu.u[ j ], tau.u)
+  } 
+  tau.u <- pow(sigma.u, -2)
+  sigma.u ~ dunif(0,100)
+  rho ~ dbeta(1,1)
+
+  # Prior for w (non-spatial)
+  for ( i in 1:N.site ) {
+     w[ i ] ~ dnorm(0, tau.w)
+  }
+  tau.w <- pow(sigma.w, -2)
+  sigma.w ~ dunif(0, 100)
+
+  #Prior for k (non-temporal)
+  for ( j in 1:N.time ) {
+     k[ j ] ~ dnorm(0, tau.k)
+  }
+  tau.k <- pow(sigma.k, -2)
+  sigma.k ~ dunif(0, 100)
+  
+  #Prior for phi
+  for (j in 1:N.time) {
+   phi[ j, 1:N.site] ~ car.normal(adj[],weights[], num[], tau.phi)  
+  }
+
+  tau.phi <- pow(sigma.phi, -2)
+  sigma.phi ~ dunif(0,100)
+
+  for ( i in 1:N.site ) {
+    for ( j in 1:N.time) {
+     ypred[ i, j ] ~ dpois(mu[i,j])
+  }
+}
+
+}
