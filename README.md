@@ -17,3 +17,5 @@ zero-inflated model considering the spatio-temporal interaction
 terms improves fitting and prediction performance. This study
 found that low humidity and a high proportion of elderly people
 are significantly associated with scrub typhus incidence.
+
+https://doi.org/10.4081/gh.2018.665
