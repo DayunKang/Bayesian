@@ -1,0 +1,44 @@
+model {
+  for ( i in 1:N.site ) {
+    for ( j in 1:N.time) {
+     y[ i, j ] ~ dnegbin(p[i,j], r)
+	  p[i,j] <- r/(r+mu[i,j])
+     log(mu[ i, j ]) <- beta0+ x1[ i, j ]*beta1 + x2[ i, j ]*beta2 + x3[ i, j ]*beta3+ x4[ i, j]*beta4
+                                       +log(pop[ i, j]) 
+  }
+ }
+  
+ #priors 
+      beta0 ~ dnorm(0,0.1)
+      beta1 ~ dnorm(0,0.1)
+      beta2 ~ dnorm(0,0.1)
+      beta3 ~ dnorm(0,0.1)
+      beta4 ~ dnorm(0,0.1)
+
+		r ~ dgamma(1, 1)
+  
+  for ( i in 1:N.site ) {
+    for ( j in 1:N.time) {
+     ypred[ i, j ] ~ dnegbin(p[i,j], r)
+  }
+}
+
+}
+
+
+# x1 : precipitation, x2 : average temperature, x3 : humidity
+
+# Data
+
+list(N.site=251, N.time=58)
+
+
+#Inits
+init1
+init2
+
+
+#parameters of interest
+#beta0~4, 
+#r, mu,
+#DIC(after converge), ypred(after converge), MSPE(in R)
